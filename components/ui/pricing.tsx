@@ -1,10 +1,19 @@
 import React, { useState } from "react";
-import { Check, Sparkles, ArrowRight, MessageSquare } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, MessageSquare, Globe, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCurrency, ALL_CURRENCIES, CurrencyCode } from "@/hooks/use-currency";
+
+const CURRENCY_LABELS: Record<CurrencyCode, string> = {
+  ZAR: "🇿🇦 ZAR",
+  USD: "🇺🇸 USD",
+  GBP: "🇬🇧 GBP",
+  EUR: "🌍 EUR",
+};
 
 export function Pricing() {
-  // Toggle: 'once-off' or 'retainer'
-  const [pricingMode, setPricingMode] = useState<"once-off" | "retainer">("once-off");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const { currency, isLoading, overrideCurrency } = useCurrency();
 
   const starterWhatsApp = "https://wa.me/27713315825?text=Hi%20Revero%2C%20I%27d%20like%20the%20Starter%20website%20package.";
   const growthWhatsApp = "https://wa.me/27713315825?text=Hi%20Revero%2C%20I%27d%20like%20the%20Growth%20website%20package.";
@@ -14,10 +23,8 @@ export function Pricing() {
     {
       name: "STARTER",
       badge: "60% OFF — Limited Time",
-      wasZar: "R1,500",
-      nowZar: "R600",
-      monthlyRetainer: "+ R199/mo",
-      retainerDesc: "Includes cloud hosting, domain renew, and minor edits",
+      wasPrice: currency.format(currency.starterWas),
+      nowPrice: currency.format(currency.starterPrice),
       desc: "Best for startups & new businesses needing a clean web presence.",
       cta: "Get Started",
       link: starterWhatsApp,
@@ -29,7 +36,7 @@ export function Pricing() {
         "Basic on-page SEO styling",
         "WhatsApp click-to-chat button",
         "Social media link integration",
-        "3-day delivery guaranteed",
+        "24-hour delivery guaranteed",
         "Free domain setup assistance",
         "1 round of revisions included",
       ],
@@ -37,10 +44,8 @@ export function Pricing() {
     {
       name: "GROWTH",
       badge: "56% OFF — Most Popular",
-      wasZar: "R4,500",
-      nowZar: "R2,000",
-      monthlyRetainer: "+ R299/mo",
-      retainerDesc: "Includes premium speed tuning, analytics & weekly audits",
+      wasPrice: currency.format(currency.growthWas),
+      nowPrice: currency.format(currency.growthPrice),
       desc: "Best for established businesses looking to gain leads and rank high.",
       cta: "Deploy Growth Package",
       link: growthWhatsApp,
@@ -57,7 +62,7 @@ export function Pricing() {
         "Google Business Profile optimization",
         "Social media feed integration",
         "2 rounds of reviews included",
-        "14-day premium delivery guaranteed",
+        "3-day premium delivery guaranteed",
         "Priority 48-hour response support",
         "Professional photo sourcing from Unsplash",
       ],
@@ -65,10 +70,8 @@ export function Pricing() {
     {
       name: "CUSTOM BUILD",
       badge: "Tailored to Fit",
-      wasZar: null,
-      nowZar: "Let's Talk",
-      monthlyRetainer: "Bespoke SLA",
-      retainerDesc: "Includes system scaling, backups & database tuning",
+      wasPrice: null,
+      nowPrice: "Let's Talk",
       desc: "For interactive custom apps, full storefronts & custom systems.",
       cta: "Get a Custom Quote",
       link: customWhatsApp,
@@ -91,37 +94,89 @@ export function Pricing() {
 
   return (
     <div className="space-y-12" id="full-pricing-portal">
-      {/* Dynamic Toggle Options */}
-      <div className="flex items-center justify-center gap-4 bg-[#F5F5F5] border border-[#E5E5E5] w-fit mx-auto px-5 py-2.5 rounded-full shadow-sm">
-        <span
-          className={`text-xs font-mono font-bold tracking-wider uppercase transition-colors ${
-            pricingMode === "once-off" ? "text-black" : "text-[#6B6B6B]"
-          }`}
-        >
-          Once-off Build
-        </span>
 
-        <button
-          onClick={() => setPricingMode(pricingMode === "once-off" ? "retainer" : "once-off")}
-          className="relative inline-flex h-6 w-12 shrink-0 cursor-pointer items-center rounded-full bg-black transition-colors outline-none"
-        >
-          <motion.span
-            layout
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-md ${
-              pricingMode === "retainer" ? "translate-x-6" : "translate-x-1"
-            }`}
-          />
-        </button>
+      {/* Currency Selector */}
+      <div className="flex items-center justify-center">
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            id="currency-selector-btn"
+            className="flex items-center gap-2 bg-[#F5F5F5] border border-[#E5E5E5] hover:border-black/30 px-4 py-2.5 rounded-full shadow-sm transition-all text-xs font-mono font-bold tracking-wider text-black"
+          >
+            <Globe size={12} className="text-[#6B6B6B]" />
+            <span>
+              {isLoading ? "Detecting…" : CURRENCY_LABELS[currency.code]}
+            </span>
+            <ChevronDown
+              size={12}
+              className={`transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+            />
+          </button>
 
-        <span
-          className={`text-xs font-mono font-bold tracking-wider uppercase transition-colors ${
-            pricingMode === "retainer" ? "text-black" : "text-[#6B6B6B]"
-          }`}
-        >
-          Monthly Retainer
-        </span>
+          <AnimatePresence>
+            {dropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 mt-2 w-48 bg-white border border-[#E5E5E5] rounded-xl shadow-lg z-50 overflow-hidden"
+                id="currency-dropdown"
+              >
+                <div className="p-1.5 space-y-0.5">
+                  <p className="text-[9px] font-mono font-bold tracking-widest text-[#6B6B6B] uppercase px-2 pt-1 pb-0.5">
+                    Select Currency
+                  </p>
+                  {ALL_CURRENCIES.map((code) => (
+                    <button
+                      key={code}
+                      id={`currency-option-${code.toLowerCase()}`}
+                      onClick={() => {
+                        overrideCurrency(code);
+                        setDropdownOpen(false);
+                      }}
+                      className={`w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-mono font-semibold transition-all ${
+                        currency.code === code
+                          ? "bg-black text-white"
+                          : "text-black hover:bg-[#F5F5F5]"
+                      }`}
+                    >
+                      <span>{CURRENCY_LABELS[code]}</span>
+                      {currency.code === code && (
+                        <span className="ml-auto text-[9px] text-white/70 font-normal">Auto</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="border-t border-[#E5E5E5] px-3 py-2">
+                  <p className="text-[9px] text-[#9B9B9B] font-mono leading-tight">
+                    {currency.flag} Prices shown in{" "}
+                    <span className="font-bold text-black">{currency.code}</span> based on your location.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
+
+
+      {/* Location notice badge */}
+      {!isLoading && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-center"
+        >
+          <div className="flex items-center gap-2 bg-[#F5F5F5] border border-[#E5E5E5] rounded-full px-4 py-1.5 shadow-sm">
+            <span className="text-base">{currency.flag}</span>
+            <span className="text-[10px] font-mono text-[#6B6B6B]">
+              Prices shown in <strong className="text-black">{currency.code}</strong> for{" "}
+              <strong className="text-black">{currency.countryName}</strong>
+            </span>
+          </div>
+        </motion.div>
+      )}
 
       {/* Grid of plans */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto" id="plans-grid">
@@ -138,7 +193,7 @@ export function Pricing() {
                   ? "border-2 border-black shadow-md scale-[1.01]"
                   : "border-[#E5E5E5] bg-[#F5F5F5] shadow-sm hover:border-black/30 hover:scale-[1.01] transition-all duration-300"
               }`}
-              id={`plan-card-${plan.name.toLowerCase()}`}
+              id={`plan-card-${plan.name.toLowerCase().replace(/\s/g, "-")}`}
             >
               {plan.isPopular && (
                 <span className="absolute -top-3 left-6 bg-black text-white text-[9px] font-mono tracking-widest px-3 py-1 rounded-full uppercase font-black">
@@ -158,26 +213,23 @@ export function Pricing() {
 
                 <div className="py-5 border-y border-[#E5E5E5]">
                   <div className="flex items-baseline gap-2">
-                    {plan.wasZar && (
-                      <span className="text-sm line-through text-neutral-400 font-mono">{plan.wasZar}</span>
+                    {plan.wasPrice && (
+                      <span className="text-sm line-through text-neutral-400 font-mono">
+                        {isLoading ? "…" : plan.wasPrice}
+                      </span>
                     )}
-                    <span className="text-4xl font-black text-black tracking-tight">{plan.nowZar}</span>
+                    <span className="text-4xl font-black text-black tracking-tight">
+                      {isLoading ? (
+                        <span className="inline-block w-24 h-8 bg-[#F0F0F0] rounded animate-pulse" />
+                      ) : (
+                        plan.nowPrice
+                      )}
+                    </span>
                   </div>
 
-                  {pricingMode === "once-off" ? (
-                    <p className="text-[10px] text-[#6B6B6B] font-mono mt-1">
-                      One-time payment. No monthly fees.
-                    </p>
-                  ) : (
-                    <div className="mt-2 space-y-1">
-                      <p className="text-sm font-bold text-green-600 font-mono uppercase">
-                        {plan.monthlyRetainer}
-                      </p>
-                      <p className="text-[10px] text-[#6B6B6B] font-mono leading-tight">
-                        {plan.retainerDesc}
-                      </p>
-                    </div>
-                  )}
+                  <p className="text-[10px] text-[#6B6B6B] font-mono mt-1">
+                    One-time payment. No monthly fees.
+                  </p>
                 </div>
 
                 <ul className="space-y-3 text-xs text-black">

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { AgencyContent, defaultContent } from "./types";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
+import { useCurrency } from "@/hooks/use-currency";
 import ContentEditor from "./components/ContentEditor";
 import { LogoCloud } from "@/components/ui/logo-cloud-3";
 import { TestimonialsColumns } from "@/components/ui/testimonials-columns-1";
@@ -39,6 +40,9 @@ export default function App() {
 
   // Mobile menu open state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Currency detection for pricing teaser section
+  const { currency, isLoading: currencyLoading } = useCurrency();
 
   // Dynamic state for editable website content
   const [content, setContent] = useState<AgencyContent>(() => {
@@ -201,7 +205,7 @@ export default function App() {
     },
     {
       q: "How fast will my website be live?",
-      a: "Starter sites: 3 days. Growth sites: 14 days. Custom builds: scoped per project.",
+      a: "Starter sites: 24 hours. Growth sites: 3 days. Custom builds: scoped per project.",
     },
     {
       q: "Do I need to provide photos or content?",
@@ -491,8 +495,8 @@ export default function App() {
                   <p className="text-xs text-[#6B6B6B]">Best for startups & simple landing showcases.</p>
                   
                   <div className="py-4 border-y border-[#E5E5E5]/60 flex items-baseline gap-2">
-                    <span className="text-sm line-through text-[#6B6B6B] font-mono">R1,500</span>
-                    <span className="text-4xl font-black text-black">R600</span>
+                    <span className="text-sm line-through text-[#6B6B6B] font-mono">{currencyLoading ? "…" : currency.format(currency.starterWas)}</span>
+                    <span className="text-4xl font-black text-black">{currencyLoading ? "…" : currency.format(currency.starterPrice)}</span>
                   </div>
                   <p className="text-[10px] text-[#6B6B6B] font-mono">One-time payment.</p>
                 </div>
@@ -521,8 +525,8 @@ export default function App() {
                   <p className="text-xs text-[#6B6B6B]">Most popular professional corporate business setups.</p>
                   
                   <div className="py-4 border-y border-[#E5E5E5]/60 flex items-baseline gap-2">
-                    <span className="text-sm line-through text-[#6B6B6B] font-mono">R4,500</span>
-                    <span className="text-4xl font-black text-black">R2,000</span>
+                    <span className="text-sm line-through text-[#6B6B6B] font-mono">{currencyLoading ? "…" : currency.format(currency.growthWas)}</span>
+                    <span className="text-4xl font-black text-black">{currencyLoading ? "…" : currency.format(currency.growthPrice)}</span>
                   </div>
                   <p className="text-[10px] text-[#6B6B6B] font-mono">One-time payment.</p>
                 </div>
@@ -646,7 +650,7 @@ export default function App() {
                     <p className="text-[10px] text-[#6B6B6B] uppercase font-mono tracking-wider">Sites Built</p>
                   </div>
                   <div>
-                    <h4 className="text-2xl font-black text-black">3-Day</h4>
+                    <h4 className="text-2xl font-black text-black">24-Hr</h4>
                     <p className="text-[10px] text-[#6B6B6B] uppercase font-mono tracking-wider">Avg. Delivery</p>
                   </div>
                   <div>
